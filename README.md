@@ -1,4 +1,4 @@
-# /security-scan — Claude Code Security Skill
+# Building a Security Code Scan Skill with Claude Code
 
 A Claude Code custom slash command that automatically detects your project stack and runs **11 specialized security tools** — covering secrets, dependency CVEs, container images, IaC misconfigurations, and SAST across 8 languages and 7 IaC frameworks.
 
@@ -55,6 +55,7 @@ Supported stacks: Node.js, Terraform, OpenTofu, AWS CDK, CloudFormation, Pulumi,
 
 ### Step 1 — Install the skill
 
+**macOS / Linux:**
 ```bash
 mkdir -p ~/.claude/commands
 
@@ -62,14 +63,25 @@ curl -sL https://raw.githubusercontent.com/jbaez22/security-scan/main/commands/s
   -o ~/.claude/commands/security-scan.md
 ```
 
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\commands" | Out-Null
+
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/jbaez22/security-scan/main/commands/security-scan.md `
+  -OutFile "$env:USERPROFILE\.claude\commands\security-scan.md"
+```
+
 That is the entire install. The skill is now available globally in every project you open in Claude Code.
 
 ### Step 2 — Install the tools
 
-Install whichever tools apply to your projects. Start with the ones covering your most common stacks:
+Install whichever tools apply to your projects. Missing tools are skipped automatically — you do not need all of them for the skill to run.
+
+<details>
+<summary><strong>macOS (Homebrew)</strong></summary>
 
 ```bash
-# macOS (Homebrew)
+# Homebrew — https://brew.sh
 brew install gitleaks       # secrets — always recommended
 brew install trivy          # containers + IaC
 brew install tfsec          # Terraform
@@ -82,11 +94,95 @@ brew install cppcheck       # C/C++
 pip install bandit          # Python SAST
 pip install checkov         # multi-framework IaC (or: brew install checkov)
 
-# Rust (cargo)
+# Rust (cargo — install via https://rustup.rs)
 cargo install cargo-audit   # Rust dependency CVEs
 ```
 
-Missing tools are skipped automatically — you do not need all of them for the skill to run.
+</details>
+
+<details>
+<summary><strong>Linux (Debian/Ubuntu)</strong></summary>
+
+```bash
+# gitleaks
+curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz \
+  | tar -xz && sudo mv gitleaks /usr/local/bin/
+
+# Trivy
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+  | sudo sh -s -- -b /usr/local/bin
+
+# tfsec
+curl -sSL https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64 \
+  -o /usr/local/bin/tfsec && chmod +x /usr/local/bin/tfsec
+
+# Semgrep
+pip install semgrep
+
+# Checkov
+pip install checkov
+
+# Bandit
+pip install bandit
+
+# gosec
+curl -sSL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
+  | sudo sh -s -- -b /usr/local/bin
+
+# ShellCheck
+sudo apt-get install -y shellcheck
+
+# cppcheck
+sudo apt-get install -y cppcheck
+
+# cargo audit (requires Rust — https://rustup.rs)
+cargo install cargo-audit
+```
+
+> For RPM-based distros (RHEL, Fedora, Amazon Linux), replace `apt-get` with `dnf` or `yum` and use the equivalent package names.
+
+</details>
+
+<details>
+<summary><strong>Windows (PowerShell / winget)</strong></summary>
+
+> **Prerequisite:** Install [Git for Windows](https://git-scm.com/download/win) and [Python](https://python.org/downloads) before running the commands below. Claude Code itself requires WSL2 or Git Bash on Windows.
+
+```powershell
+# winget (Windows Package Manager — built into Windows 11)
+winget install gitleaks         # secrets
+
+# Trivy
+winget install AquaSecurity.Trivy
+
+# tfsec — download the Windows binary directly
+Invoke-WebRequest -Uri https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-windows-amd64.exe `
+  -OutFile "$env:LOCALAPPDATA\Microsoft\WindowsApps\tfsec.exe"
+
+# Semgrep, Checkov, Bandit (pip — requires Python)
+pip install semgrep checkov bandit
+
+# gosec — download the Windows binary
+Invoke-WebRequest -Uri https://github.com/securego/gosec/releases/latest/download/gosec_windows_amd64.zip `
+  -OutFile gosec.zip
+Expand-Archive gosec.zip -DestinationPath "$env:LOCALAPPDATA\Microsoft\WindowsApps\"
+Remove-Item gosec.zip
+
+# ShellCheck — via Scoop (https://scoop.sh) or winget
+scoop install shellcheck
+# or: winget install koalaman.shellcheck
+
+# cppcheck — via Scoop or winget
+scoop install cppcheck
+# or: winget install Cppcheck.Cppcheck
+
+# cargo audit (requires Rust — https://rustup.rs)
+cargo install cargo-audit
+```
+
+> **Tip:** [Scoop](https://scoop.sh) (`iwr -useb get.scoop.sh | iex`) simplifies CLI tool management on Windows and is the recommended package manager for developer tools.
+
+</details>
 
 ---
 
@@ -139,9 +235,18 @@ Every run saves a `security-scan-report-YYYY-MM-DD.md` file to the project root.
 
 ## Updating
 
+Re-run the install command for your platform to pull the latest version:
+
+**macOS / Linux:**
 ```bash
 curl -sL https://raw.githubusercontent.com/jbaez22/security-scan/main/commands/security-scan.md \
   -o ~/.claude/commands/security-scan.md
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/jbaez22/security-scan/main/commands/security-scan.md `
+  -OutFile "$env:USERPROFILE\.claude\commands\security-scan.md"
 ```
 
 ---
