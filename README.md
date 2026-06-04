@@ -1,6 +1,6 @@
 # Building a Security Code Scan Skill with Claude Code
 
-A Claude Code custom slash command that automatically detects your project stack and runs **11 specialized security tools** — covering secrets, dependency CVEs, container images, IaC misconfigurations, and SAST across 8 languages and 7 IaC frameworks.
+A Claude Code skill that automatically detects your project stack and runs **11 specialized security tools** — covering secrets, dependency CVEs, container images, IaC misconfigurations, and SAST across 8 languages and 7 IaC frameworks.
 
 One command. Any project. Zero configuration.
 
